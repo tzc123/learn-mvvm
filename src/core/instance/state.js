@@ -218,12 +218,13 @@ export function defineComputed (
   // 服务端渲染不需要缓存计算属性
   const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
-    // 服务端渲染则不响应data改变
+    // 服务端渲染则不响应数据改变
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : userDef
     sharedPropertyDefinition.set = noop
   } else {
+    // 如果计算属性是对象则，则还可以设置如何修改计算属性的值
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
@@ -249,7 +250,7 @@ function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
-      // computed 属于懒观察者，依赖更新时需要重新计算，dirty == true 说明依赖已更新。
+      // 使用watcher.dirty判断依赖是否更新，更新则重新计算
       if (watcher.dirty) {
         watcher.evaluate()
       }

@@ -18,7 +18,7 @@ export function initExtend (Vue: GlobalAPI) {
    * Class inheritance
    */
   Vue.extend = function (extendOptions: Object): Function {
-    // 以当前Vue类为超类，添加配置，返回它的子类
+    // 以当前Vue类为父类，添加配置，返回它的子类
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
@@ -32,6 +32,7 @@ export function initExtend (Vue: GlobalAPI) {
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name)
     }
+    // 构建组件的构造函数继承自Vue
     const Sub = function VueComponent (options) {
       this._init(options)
     }
@@ -39,6 +40,7 @@ export function initExtend (Vue: GlobalAPI) {
     // 对prototype进行了赋值，所以constructor被移除了，需要重新添加
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
+    // 合并配置
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
@@ -48,6 +50,7 @@ export function initExtend (Vue: GlobalAPI) {
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
+    // 在继承时就将props,computed进行代理，避免每次实例化都要代理
     if (Sub.options.props) {
       initProps(Sub)
     }
@@ -56,16 +59,19 @@ export function initExtend (Vue: GlobalAPI) {
     }
 
     // allow further extension/mixin/plugin usage
+    // 将Vue的全局API同样挂在到子类上
     Sub.extend = Super.extend
     Sub.mixin = Super.mixin
     Sub.use = Super.use
 
     // create asset registers, so extended classes
     // can have their private assets too.
+    // 将Vue的资源同样挂到子类上
     ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
     // enable recursive self-lookup
+    // 可以通过自己找到自己。。。
     if (name) {
       Sub.options.components[name] = Sub
     }
@@ -73,11 +79,12 @@ export function initExtend (Vue: GlobalAPI) {
     // keep a reference to the super options at extension time.
     // later at instantiation we can check if Super's options have
     // been updated.
+    // 保留对Vue配置的参考，这样实例化时就可以检测Vue的配置是否更新了
     Sub.superOptions = Super.options
     Sub.extendOptions = extendOptions
     Sub.sealedOptions = extend({}, Sub.options)
 
-    // 将结果缓存
+    // 将结果缓存到
     // cache constructor
     cachedCtors[SuperId] = Sub
     return Sub
@@ -87,6 +94,7 @@ export function initExtend (Vue: GlobalAPI) {
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
+    // 使得this可以访问this._props的属性
     proxy(Comp.prototype, `_props`, key)
   }
 }

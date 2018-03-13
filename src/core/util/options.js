@@ -273,6 +273,7 @@ export function validateComponentName (name: string) {
  * Object-based format.
  */
 function normalizeProps (options: Object, vm: ?Component) {
+  // 格式化props
   const props = options.props
   if (!props) return
   const res = {}
@@ -310,6 +311,7 @@ function normalizeProps (options: Object, vm: ?Component) {
  * Normalize all injections into Object-based format
  */
 function normalizeInject (options: Object, vm: ?Component) {
+  // 格式化inject
   const inject = options.inject
   if (!inject) return
   const normalized = options.inject = {}
@@ -336,6 +338,7 @@ function normalizeInject (options: Object, vm: ?Component) {
 /**
  * Normalize raw function directives into object format.
  */
+// 格式化指令
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
   if (dirs) {
@@ -362,11 +365,13 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 合并两个配置对象，主要作用于实例化和继承。
 export function mergeOptions (
   parent: Object,
   child: Object,
   vm?: Component
 ): Object {
+  // 非生产环境检查组件名是否合法
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
@@ -374,14 +379,16 @@ export function mergeOptions (
   if (typeof child === 'function') {
     child = child.options
   }
-
+  // 格式化props、inject、directive
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
   const extendsFrom = child.extends
+  // 如果被合并的配置有有扩展则将扩展一同合并
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  // 如果被合并的配置有混合则将混合一起合并
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
@@ -389,18 +396,23 @@ export function mergeOptions (
   }
   const options = {}
   let key
+  // 开始合并
+  // 先将主配置的属性全部合并
   for (key in parent) {
     mergeField(key)
   }
+  // 然后将被合并的配置的不在主配置上的属性合并
   for (key in child) {
     if (!hasOwn(parent, key)) {
       mergeField(key)
     }
   }
   function mergeField (key) {
+    // 根据属性名选择使用哪种合并策略(取舍)
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
+  // 合并完成
   return options
 }
 
