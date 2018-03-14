@@ -12,6 +12,7 @@ import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-slots'
 
 export function installRenderHelpers (target: any) {
+  // 挂载渲染函数到制定对象
   target._o = markOnce
   target._n = toNumber
   target._s = toString

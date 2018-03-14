@@ -101,6 +101,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
+    // 在Vue.extend时，保留了对Vue.options的引用
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
